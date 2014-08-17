@@ -1,10 +1,9 @@
 # makfile configuration
 NAME            = main
-OBJECTS         = main.o
+OBJECTS         = main.o board.o
 CPU             = msp430g2553
-DRIVERLIB	= ../ext/driverlib_1_90_00_65/driverlib/MSP430i2xx/
 
-CFLAGS          = -mmcu=${CPU} -O2 -Wall -g -I${DRIVERLIB}
+CFLAGS          = -mmcu=${CPU} -O2 -Wall -g
 
 #switch the compiler (for the internal make rules)
 CC              = msp430-gcc
@@ -45,4 +44,5 @@ dist:
 FORCE:
 
 #project dependencies
-main.o: main.c 
+main.o: main.c
+board.o: board.c board.h
