@@ -1,6 +1,6 @@
 # makfile configuration
 NAME            = main
-OBJECTS         = main.o board.o
+OBJECTS         = main.o board.o ../lib/uart.o
 CPU             = msp430g2553
 
 CFLAGS          = -mmcu=${CPU} -O2 -Wall -g
@@ -19,7 +19,7 @@ download: download-jtag
 
 #additional rules for files
 ${NAME}.elf: ${OBJECTS}
-	${CC} -mmcu=${CPU} -o $@ ${OBJECTS}
+	${CC} -mmcu=${CPU} -o $@ ${OBJECTS} -lm
 
 ${NAME}.a43: ${NAME}.elf
 	msp430-objcopy -O ihex $^ $@
@@ -46,3 +46,4 @@ FORCE:
 #project dependencies
 main.o: main.c
 board.o: board.c board.h
+../lib/uart.o: ../lib/uart.c ../lib/uart.h
