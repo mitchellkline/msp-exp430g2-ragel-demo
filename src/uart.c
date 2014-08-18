@@ -1,4 +1,10 @@
 /*
+* Modified by Mitchell Kline (mitchellkline@gmail.com)
+*   * Supports MSP430Gx2xx series processors (breaks support with F)
+*   * Working with MSP-EXP430G2 LaunchPad Development Tool
+*   * Does not current support native UART, only USCI UART
+*   * Original author and file details below
+* ---
 * Copyright (c) 2012 All Right Reserved, Gustavo Litovsky
 *
 * You may use this file for any purpose, provided this copyright notice and
@@ -22,10 +28,8 @@
 #include <string.h>
 #include "uart.h"
 
-#define PI M_PI
-
 // Port Information List so user isn't forced to pass information all the time
-UARTConfig * prtInfList[5];
+UARTConfig * prtInfList[4];
 
 /*!
  * \brief Initializes the UART Driver
@@ -37,8 +41,8 @@ UARTConfig * prtInfList[5];
  */
 void initUartDriver()
 {
-	int i = 0;
-	for(i = 0; i < 5; i++)
+        int i = 0;
+	for(i = 0; i < 4; i++)
 	{
 		prtInfList[i] = NULL;
 	}
@@ -54,67 +58,71 @@ void initUartDriver()
  */
 int initUartPort(UARTConfig * prtInf)
 {
-	unsigned char * prtSelReg = NULL;
+	unsigned char * prtSelReg1 = NULL;
+        unsigned char * prtSelReg2 = NULL;
 	switch(prtInf->portNum)
 	{
 #ifdef __MSP430_HAS_PORT1_R__
 		case 1:
-			prtSelReg = (unsigned char *)&P1SEL;
+			prtSelReg1 = (unsigned char *)&P1SEL;
+			prtSelReg2 = (unsigned char *)&P1SEL2;
 			break;
 #endif
 #ifdef __MSP430_HAS_PORT2_R__
 		case 2:
-			prtSelReg = (unsigned char *)&P2SEL;
+			prtSelReg1 = (unsigned char *)&P2SEL;
 			break;
 #endif
 #ifdef __MSP430_HAS_PORT3_R__
 		case 3:
-			prtSelReg = (unsigned char *)&P3SEL;
+			prtSelReg1 = (unsigned char *)&P3SEL;
 			break;
 #endif
 #ifdef __MSP430_HAS_PORT4_R__
 		case 4:
-			prtSelReg = (unsigned char *)&P4SEL;
+			prtSelReg1 = (unsigned char *)&P4SEL;
 			break;
 #endif
 #ifdef __MSP430_HAS_PORT5_R__
 		case 5:
-			prtSelReg = (unsigned char *)&P5SEL;
+			prtSelReg1 = (unsigned char *)&P5SEL;
 			break;
 #endif
 #ifdef __MSP430_HAS_PORT6_R__
 		case 6:
-			prtSelReg = (unsigned char *)&P6SEL;
+			prtSelReg1 = (unsigned char *)&P6SEL;
 			break;
 #endif
 #ifdef __MSP430_HAS_PORT7_R__
 		case 7:
-			prtSelReg = (unsigned char *)&P7SEL;
+			prtSelReg1 = (unsigned char *)&P7SEL;
 			break;
 #endif
 #ifdef __MSP430_HAS_PORT8_R__
 		case 8:
-			prtSelReg = (unsigned char *)&P8SEL;
+			prtSelReg1 = (unsigned char *)&P8SEL;
 			break;
 #endif
 #ifdef __MSP430_HAS_PORT9_R__
 		case 9:
-			prtSelReg = (unsigned char *)&P9SEL;
+			prtSelReg1 = (unsigned char *)&P9SEL;
 			break;
 #endif
 		default:
-			prtSelReg = NULL;
+			prtSelReg1 = NULL;
+			prtSelReg2 = NULL;
 			break;
 	}
 
-	if(prtSelReg == NULL)
+	if(prtSelReg1 == NULL || prtSelReg2 == NULL)
 	{
 		return UART_BAD_PORT_SELECTED;
 	}
 
 	// Configure Port to use UART Module by setting the corresponding bits on the PxSEL
 	// register.
-	*prtSelReg |=  (BIT0 << prtInf->RxPinNum) | (BIT0 << prtInf->TxPinNum);
+	*prtSelReg1 |=  (BIT0 << prtInf->RxPinNum) | (BIT0 << prtInf->TxPinNum);
+	*prtSelReg2 |=  (BIT0 << prtInf->RxPinNum) | (BIT0 << prtInf->TxPinNum);
 
 	return UART_SUCCESS;
 }
@@ -221,8 +229,14 @@ int configUSCIUart(UARTConfig * prtInf,USCIUARTRegs * confRegs)
 		*confRegs->BR1_REG = ((N_div & 0xFF00) >> 8);
 
 		N_div_f /= 16.0;
-		*confRegs->MCTL_REG = (unsigned char)(((N_div_f) - round(N_div_f))*16.0f) << 4; // Set BRF
+		*confRegs->MCTL_REG = ((unsigned char)round(((N_div_f) - floor(N_div_f))*16.0f)) << 4; // Set BRF
 		*confRegs->MCTL_REG |= UCOS16; // Enable Oversampling Mode
+
+                //*confRegs->MCTL_REG = (13 << 4) | (0 << 1) | (1 << 0);
+                if (*confRegs->MCTL_REG == ( (13 << 4 ) | (0 << 1) | (1 << 0) ) 
+                  && *confRegs->BR0_REG == 6 && *confRegs->BR1_REG == 0) {
+                  P1OUT |= BIT0;
+                }
 	}
 	else
 	{
@@ -230,8 +244,8 @@ int configUSCIUart(UARTConfig * prtInf,USCIUARTRegs * confRegs)
 		*confRegs->BR0_REG = (N_div & 0x00FF);
 		*confRegs->BR1_REG = ((N_div & 0xFF00) >> 8);
 
-		*confRegs->MCTL_REG = (unsigned char)((N_div_f - round(N_div_f))*8.0f) << 1; // Set BRS
-	}
+		*confRegs->MCTL_REG = ((unsigned char)round((N_div_f - floor(N_div_f))*8.0f)) << 1; // Set BRS
+        }
 
 	// Take Module out of reset
 	*confRegs->CTL1_REG &= ~UCSWRST;
@@ -511,12 +525,12 @@ int uartSendStringBlocking(UARTConfig * prtInf,char * string)
  * \return Success or errors as defined by UART_ERR_CODES
  *
  */
-void setUartTxBuffer(UARTConfig * prtInf, unsigned char * buf, int bufLen)
+void setUartTxBuffer(UARTConfig * prtInf, uint8_t * buf, uint16_t bufLen)
 {
 	prtInf->txBuf = buf;
 	prtInf->txBufLen = bufLen;
 
-	int i = 0;
+	uint16_t i = 0;
 	for(i = 0; i < bufLen; i++)
 	{
 		buf[i] = 0;
@@ -756,13 +770,13 @@ __interrupt void USCIAB0TX_ISR(void)
 		// If we've sent all the bytes, set counter to 0 to stop the sending
 		if(prtInfList[USCI_A0]->txBufCtr == prtInfList[USCI_A0]->txBytesToSend)
 		{
-		prtInfList[USCI_A0]->txBufCtr = 0;
+		  prtInfList[USCI_A0]->txBufCtr = 0;
 
-		// Disable TX IE
-		*prtInfList[USCI_A0]->usciRegs->IE_REG &= ~UCA0TXIE;
+		  // Disable TX IE
+		  *prtInfList[USCI_A0]->usciRegs->IE_REG &= ~UCA0TXIE;
 
-		// Clear TX IFG
-		*prtInfList[USCI_A0]->usciRegs->IFG_REG &= ~UCA0TXIFG;
+		  // Clear TX IFG
+		  *prtInfList[USCI_A0]->usciRegs->IFG_REG &= ~UCA0TXIFG;
 		}
 	}
 }

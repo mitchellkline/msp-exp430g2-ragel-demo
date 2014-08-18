@@ -1,4 +1,10 @@
 /*
+* Modified by Mitchell Kline (mitchellkline@gmail.com)
+*   * Supports MSP430Gx2xx series processors (breaks support with F)
+*   * Working with MSP-EXP430G2 LaunchPad Development Tool
+*   * Does not current support native UART, only USCI UART
+*   * Original author and file details below
+* ---
 * Copyright (c) 2012 All Right Reserved, Gustavo Litovsky
 *
 * You may use this file for any purpose, provided this copyright notice and
@@ -156,7 +162,7 @@ int uartSendStringBlocking(UARTConfig * prtInf,char * string);
 int initUSCIUart(USCIUARTRegs * confRegs, UARTConfig * prtInf);
 int initUartPort(UARTConfig * prtInf);
 void initBufferDefaults(UARTConfig * prtInf);
-void setUartTxBuffer(UARTConfig * prtInf, unsigned char * buf, int bufLen);
+void setUartTxBuffer(UARTConfig * prtInf, uint8_t * buf, uint16_t bufLen);
 void setUartRxBuffer(UARTConfig * prtInf, unsigned char * buf, int bufLen);
 void initUartDriver();
 int uartSendDataInt(UARTConfig * prtInf,unsigned char * buf, int len);

@@ -1,9 +1,9 @@
 # makfile configuration
 NAME            = main
-OBJECTS         = main.o board.o ../lib/uart.o
+OBJECTS         = main.o board.o uart.o
 CPU             = msp430g2553
 
-CFLAGS          = -mmcu=${CPU} -O2 -Wall -g
+CFLAGS          = -mmcu=${CPU} -O2 -Wall -g -I../lib
 
 #switch the compiler (for the internal make rules)
 CC              = msp430-gcc
@@ -40,10 +40,14 @@ clean:
 dist:
 	tar czf dist.tgz *.c *.h *.txt makefile
 
+flash:
+	mspdebug rf2500 erase
+	mspdebug rf2500 'load main.elf'
+
 #dummy target as dependecy if something has to be build everytime
 FORCE:
 
 #project dependencies
 main.o: main.c
 board.o: board.c board.h
-../lib/uart.o: ../lib/uart.c ../lib/uart.h
+uart.o: uart.c uart.h

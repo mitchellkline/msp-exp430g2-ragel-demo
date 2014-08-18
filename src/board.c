@@ -19,4 +19,7 @@ void button_init(void)                 // Configure Push Button
 void board_init(void) {
   led_init();
   button_init();
+
+  P1DIR |= P1_TXD;
+  P1DIR &= ~P1_RXD;
 }
