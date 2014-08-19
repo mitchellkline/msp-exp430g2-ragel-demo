@@ -8,8 +8,8 @@
 
 #define     P1_BUTTON             BIT3
 
-#define     P1_TXD                BIT1                      // TXD on P1.1
-#define     P1_RXD                BIT2                      // RXD on P1.2
+#define     P1_RXD                BIT1                      // RXD on P1.1
+#define     P1_TXD                BIT2                      // TXD on P1.2
 
 void led_init(void);
 void button_init(void);

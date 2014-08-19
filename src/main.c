@@ -9,8 +9,8 @@ UARTConfig cnf;
 USCIUARTRegs uartUsciRegs;
 USARTUARTRegs uartUsartRegs;
 
-static uint8_t uartTxBuf[50];
-static uint8_t uartRxBuf[50];
+uint8_t uartTxBuf[50];
+int8_t uartRxBuf[50];
 
 void main(void) {
   /* initialization code */
@@ -24,11 +24,11 @@ void main(void) {
   cnf.moduleName = USCI_A0;
   // Use UART Pins P1.1 and P1.2
   cnf.portNum = PORT_1;
-  cnf.RxPinNum = PIN2;
-  cnf.TxPinNum = PIN1;
+  cnf.RxPinNum = PIN1;
+  cnf.TxPinNum = PIN2;
   // 115200 Baud from 1.1 MHz SMCLK
   cnf.clkRate = FCLK;
-  cnf.baudRate = 9600L;
+  cnf.baudRate = 2400L;
   cnf.clkSrc = UART_CLK_SRC_SMCLK;
   // 8N1
   cnf.databits = 8;
@@ -59,7 +59,7 @@ void main(void) {
   while(1)
   {
     // Send the string hello using interrupt driven
-    uartSendDataInt(&cnf,(unsigned char *)"Hello\r\n", strlen("Hello\r\n"));
+    //uartSendDataInt(&cnf,(unsigned char *)"Hello\r\n", strlen("Hello\r\n"));
     P1OUT |= P1_LED_GRN;
     __delay_cycles(FCLK >> 1);
     P1OUT &= ~P1_LED_GRN;
@@ -91,3 +91,5 @@ void main(void) {
     }
   }
 }
+
+

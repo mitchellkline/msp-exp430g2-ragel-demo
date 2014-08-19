@@ -233,10 +233,10 @@ int configUSCIUart(UARTConfig * prtInf,USCIUARTRegs * confRegs)
 		*confRegs->MCTL_REG |= UCOS16; // Enable Oversampling Mode
 
                 //*confRegs->MCTL_REG = (13 << 4) | (0 << 1) | (1 << 0);
-                if (*confRegs->MCTL_REG == ( (13 << 4 ) | (0 << 1) | (1 << 0) ) 
+                /*if (*confRegs->MCTL_REG == ( (13 << 4 ) | (0 << 1) | (1 << 0) ) 
                   && *confRegs->BR0_REG == 6 && *confRegs->BR1_REG == 0) {
                   P1OUT |= BIT0;
-                }
+                }*/
 	}
 	else
 	{
