@@ -24,9 +24,10 @@
 */
 
 #include <msp430.h>
-#include <math.h>
 #include <string.h>
 #include "uart.h"
+
+#define round(x) ((x)>=0?(int32_t)((x)+0.5):(int32_t)(x-0.5))
 
 // Port Information List so user isn't forced to pass information all the time
 UARTConfig * prtInfList[4];
@@ -229,7 +230,7 @@ int configUSCIUart(UARTConfig * prtInf,USCIUARTRegs * confRegs)
 		*confRegs->BR1_REG = ((N_div & 0xFF00) >> 8);
 
 		N_div_f /= 16.0;
-		*confRegs->MCTL_REG = ((unsigned char)round(((N_div_f) - floor(N_div_f))*16.0f)) << 4; // Set BRF
+		*confRegs->MCTL_REG = ((uint8_t)round(((N_div_f) - (int32_t)(N_div_f))*16.0f)) << 4; // Set BRF
 		*confRegs->MCTL_REG |= UCOS16; // Enable Oversampling Mode
 
                 //*confRegs->MCTL_REG = (13 << 4) | (0 << 1) | (1 << 0);
@@ -244,7 +245,7 @@ int configUSCIUart(UARTConfig * prtInf,USCIUARTRegs * confRegs)
 		*confRegs->BR0_REG = (N_div & 0x00FF);
 		*confRegs->BR1_REG = ((N_div & 0xFF00) >> 8);
 
-		*confRegs->MCTL_REG = ((unsigned char)round((N_div_f - floor(N_div_f))*8.0f)) << 1; // Set BRS
+		*confRegs->MCTL_REG = ((uint8_t)round((N_div_f - (int32_t)(N_div_f))*8.0f)) << 1; // Set BRS
         }
 
 	// Take Module out of reset
@@ -865,8 +866,4 @@ int readRxBytes(UARTConfig * prtInf, unsigned char * data, int numBytesToRead, i
 
 	return i;
 
-}
-
-float round(float f) {
-	return (f > (floor(f)+0.5f)) ? ceil(f) : floor(f);
 }
