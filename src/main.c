@@ -15,7 +15,7 @@ uint8_t mode = MODE_STANDBY;
 
 UARTConfig cnf;
 USCIUARTRegs uartUsciRegs;
-USARTUARTRegs uartUsartRegs;
+//USARTUARTRegs uartUsartRegs;
 
 uint8_t uartTxBuf[UART_BUF];
 uint8_t uartRxBuf[UART_BUF];
@@ -68,7 +68,7 @@ void main(void) {
   {
     // Send the string hello using interrupt driven
     if (mode == MODE_TRANSMIT) {
-      uartSendDataInt(&cnf,(unsigned char *)"Hello\r\n", strlen("Hello\r\n"));
+      uartSendDataInt(&cnf,(uint8_t *)"Hello\r\n", strlen("Hello\r\n"));
     }
     //P1OUT |= P1_LED_GRN;
     __delay_cycles(FCLK >> 1);
@@ -79,7 +79,7 @@ void main(void) {
     if(bytesAvailable > 0)
     {
       //P1OUT |= P1_LED_RED;
-      unsigned char tempBuf[UART_BUF];
+      uint8_t tempBuf[UART_BUF];
       memset(tempBuf,0,UART_BUF);
 
       volatile int bytesRead = readRxBytes(&cnf, tempBuf, bytesAvailable, 0);
@@ -107,8 +107,9 @@ void main(void) {
  * 1. During standby mode: to exit and enter application mode
  * 2. During application mode: to recalibrate temp sensor 
  * *********************************************************** */
-#pragma vector=PORT1_VECTOR
-__interrupt void PORT1_ISR(void)
+__attribute__ ((__interrupt__(PORT1_VECTOR)))
+static void
+PORT1_ISR(void)
 {   
   P1IFG = 0; /* clear interrupt */
   mode = (mode == MODE_STANDBY) ? MODE_TRANSMIT : MODE_STANDBY;

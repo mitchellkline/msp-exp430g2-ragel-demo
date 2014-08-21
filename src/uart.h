@@ -62,9 +62,9 @@ enum UART_ERR_CODES
 typedef enum
 {
 	USCI_A0,  /**< USCI_A0 Module  */
-	USCI_A1,  /**< USCI_A1 Module  */
-	USART_0,  /**< USART_0 Module  */
-	USART_1  /**< USART_1 Module  */
+	USCI_A1  /**< USCI_A1 Module  */
+	//USART_0,  /**< USART_0 Module  */
+	//USART_1  /**< USART_1 Module  */
 
 }UART_MODULE_NAMES;
 
@@ -90,15 +90,15 @@ typedef enum
  */
 typedef struct
 {
-	unsigned char * CTL0_REG;
-	unsigned char * CTL1_REG;
-	unsigned char * MCTL_REG;
-	unsigned char * BR0_REG;
-	unsigned char * BR1_REG;
-	unsigned char * IE_REG;
-	unsigned char * RX_BUF;
-	unsigned char * TX_BUF;
-	unsigned char * IFG_REG;
+	uint8_t * CTL0_REG;
+	uint8_t * CTL1_REG;
+	uint8_t * MCTL_REG;
+	uint8_t * BR0_REG;
+	uint8_t * BR1_REG;
+	uint8_t * IE_REG;
+	uint8_t * RX_BUF;
+	uint8_t * TX_BUF;
+	uint8_t * IFG_REG;
 } USCIUARTRegs;
 
 /** @struct USARTUARTRegs
@@ -106,23 +106,25 @@ typedef struct
  *  		registers necessary to configure and use a USART UART module.
  *
  */
+/*
 typedef struct
 {
-	unsigned char * ME_REG;
-	unsigned char * U0CTL_REG;
-	unsigned char * UTCLT0_REG;
-	unsigned char * UBR0_REG;
-	unsigned char * UBR1_REG;
-	unsigned char * UMCTL_REG;
-	unsigned char * IE_REG;
-	unsigned char * RX_BUF;
-	unsigned char * TX_BUF;
-	unsigned char * IFG_REG;
-	unsigned char TXIFGFlag;
-	unsigned char RXIFGFlag;
-	unsigned char TXIE;
-	unsigned char RXIE;
+	uint8_t * ME_REG;
+	uint8_t * U0CTL_REG;
+	uint8_t * UTCLT0_REG;
+	uint8_t * UBR0_REG;
+	uint8_t * UBR1_REG;
+	uint8_t * UMCTL_REG;
+	uint8_t * IE_REG;
+	uint8_t * RX_BUF;
+	uint8_t * TX_BUF;
+	uint8_t * IFG_REG;
+	uint8_t TXIFGFlag;
+	uint8_t RXIFGFlag;
+	uint8_t TXIE;
+	uint8_t RXIE;
 } USARTUARTRegs;
+*/
 
 /** @struct UARTConfig
  *  @brief This struct contains all the configuration needed for
@@ -135,16 +137,16 @@ typedef struct
 	char portNum;                 /**< GPIO Port Number  */
 	char TxPinNum;                /**< GPIO TX Pin Number  */
 	char RxPinNum;                /**< GPIO RX Pin Number  */
-	unsigned long clkRate;        /**< Clock rate of the clock used as source for module  */
-	unsigned long baudRate;       /**< UART baud rate desired  */
+	uint32_t clkRate;        /**< Clock rate of the clock used as source for module  */
+	uint32_t baudRate;       /**< UART baud rate desired  */
 	UART_CLK_SRCS clkSrc;         /**< Clock source used for UART module  */
 	char databits;                /**< Number of data bits used for communications  */
 	char stopbits;                /**< Number of stop bits used for communications  */
 	UART_PARITY parity;           /**< Parity used for communications  */
 	USCIUARTRegs * usciRegs;
-	USARTUARTRegs * usartRegs;
-	unsigned char * txBuf;
-	unsigned char * rxBuf;
+	//USARTUARTRegs * usartRegs;
+	uint8_t * txBuf;
+	uint8_t * rxBuf;
 	int txBufLen;
 	int rxBufLen;
 	int rxBytesReceived;
@@ -153,22 +155,21 @@ typedef struct
 } UARTConfig;
 
 
-
 /* Function Declarations */
 int configUSCIUart(UARTConfig * prtInf,USCIUARTRegs * confRegs);
-int configUSARTUart(UARTConfig * prtInf, USARTUARTRegs * confRegs);
-int uartSendDataBlocking(UARTConfig * prtInf,unsigned char * buf, int len);
+//int configUSARTUart(UARTConfig * prtInf, USARTUARTRegs * confRegs);
+int uartSendDataBlocking(UARTConfig * prtInf,uint8_t * buf, int len);
 int uartSendStringBlocking(UARTConfig * prtInf,char * string);
 int initUSCIUart(USCIUARTRegs * confRegs, UARTConfig * prtInf);
 int initUartPort(UARTConfig * prtInf);
 void initBufferDefaults(UARTConfig * prtInf);
 void setUartTxBuffer(UARTConfig * prtInf, uint8_t * buf, uint16_t bufLen);
-void setUartRxBuffer(UARTConfig * prtInf, unsigned char * buf, int bufLen);
+void setUartRxBuffer(UARTConfig * prtInf, uint8_t * buf, int bufLen);
 void initUartDriver();
-int uartSendDataInt(UARTConfig * prtInf,unsigned char * buf, int len);
+int uartSendDataInt(UARTConfig * prtInf,uint8_t * buf, int len);
 void enableUartRx(UARTConfig * prtInf);
 int numUartBytesReceived(UARTConfig * prtInf);
-unsigned char * getUartRxBufferData(UARTConfig * prtInf);
-int readRxBytes(UARTConfig * prtInf, unsigned char * data, int numBytesToRead, int offset);
+uint8_t * getUartRxBufferData(UARTConfig * prtInf);
+int readRxBytes(UARTConfig * prtInf, uint8_t * data, int numBytesToRead, int offset);
 
 #endif /* UART_H_ */

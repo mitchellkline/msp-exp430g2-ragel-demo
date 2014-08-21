@@ -3,7 +3,7 @@ NAME            = main
 OBJECTS         = main.o board.o uart.o
 CPU             = msp430g2553
 
-CFLAGS          = -mmcu=${CPU} -O2 -Wall -g -I../lib
+CFLAGS          = -mmcu=${CPU} -O2 -Wall -g
 
 #switch the compiler (for the internal make rules)
 CC              = msp430-gcc
@@ -40,7 +40,7 @@ clean:
 dist:
 	tar czf dist.tgz *.c *.h *.txt makefile
 
-flash:
+flash: all
 	mspdebug rf2500 erase
 	mspdebug rf2500 'load main.elf'
 
