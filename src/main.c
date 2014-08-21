@@ -1,24 +1,9 @@
 #include <msp430.h>
+#include <stdio.h>
 #include <string.h>
 #include "board.h"
-#include "uart.h"
 
-#define FCLK 1100000L
-#define BAUD_RATE 9600L
-
-#define MODE_STANDBY 0
-#define MODE_TRANSMIT 1
-
-#define UART_BUF 50
-
-uint8_t mode = MODE_STANDBY;
-
-UARTConfig cnf;
-USCIUARTRegs uartUsciRegs;
-//USARTUARTRegs uartUsartRegs;
-
-uint8_t uartTxBuf[UART_BUF];
-uint8_t uartRxBuf[UART_BUF];
+uint16_t counter;
 
 int main(void) {
   /* initialization code */
@@ -26,79 +11,13 @@ int main(void) {
   WDTCTL = WDTPW | WDTHOLD;
 
   board_init();
+  counter = 0;
+       
+  //__enable_interrupt(); // Enable Global Interrupts
 
-  initUartDriver();
-  // Configure UART Module on USCIA0
-  cnf.moduleName = USCI_A0;
-  // Use UART Pins P1.1 and P1.2
-  cnf.portNum = PORT_1;
-  cnf.RxPinNum = PIN1;
-  cnf.TxPinNum = PIN2;
-  // 115200 Baud from 1.1 MHz SMCLK
-  cnf.clkRate = FCLK;
-  cnf.baudRate = BAUD_RATE;
-  cnf.clkSrc = UART_CLK_SRC_SMCLK;
-  // 8N1
-  cnf.databits = 8;
-  cnf.parity = UART_PARITY_NONE;
-  cnf.stopbits = 1;
-  int res = configUSCIUart(&cnf,&uartUsciRegs);
-  if(res != UART_SUCCESS)
-  {
-      // Failed to initialize UART for some reason
-      P1OUT |= P1_LED_RED;
-      __no_operation();
-  }
-  // Configure the buffers that will be used by the UART Driver.
-  // These buffers are exclusively for the UART driver's use and should not be touched
-  // by the application itself. Note that they may affect performance if they're too
-  // small.
 
-  setUartTxBuffer(&cnf, uartTxBuf, UART_BUF);
-  setUartRxBuffer(&cnf, uartRxBuf, UART_BUF);
-  enableUartRx(&cnf);
-
-  /*********************************/
-        
-  __enable_interrupt(); // Enable Global Interrupts
-
-   
-
-  while(1)
-  {
-    // Send the string hello using interrupt driven
-    if (mode == MODE_TRANSMIT) {
-      uartSendDataInt(&cnf,(uint8_t *)"Hello\r\n", strlen("Hello\r\n"));
-    }
-    //P1OUT |= P1_LED_GRN;
-    __delay_cycles(FCLK >> 1);
-    //P1OUT &= ~P1_LED_GRN;
-    __delay_cycles(FCLK >> 1);
-
-    int bytesAvailable = numUartBytesReceived(&cnf);
-    if(bytesAvailable > 0)
-    {
-      //P1OUT |= P1_LED_RED;
-      uint8_t tempBuf[UART_BUF];
-      memset(tempBuf,0,UART_BUF);
-
-      volatile int bytesRead = readRxBytes(&cnf, tempBuf, bytesAvailable, 0);
-      if(bytesRead == bytesAvailable)
-      {
-        // All requested bytes read. Do something with it.
-
-	// If we receive the letter a, we toggle the LED
-	if(tempBuf[0] == 'a')
-	{
-	  P1OUT ^= P1_LED_GRN;
-	}
-      }
-      else
-      {
-	// Couldn't read all the bytes we requested
-	__no_operation();
-      }
-    }
+  while(1) {
+    __bis_SR_register(LPM3_bits+GIE);
   }
   return 0;
 }
@@ -112,6 +31,16 @@ __attribute__ ((__interrupt__(PORT1_VECTOR)))
 static void
 PORT1_ISR(void)
 {   
-  P1IFG = 0; /* clear interrupt */
-  mode = (mode == MODE_STANDBY) ? MODE_TRANSMIT : MODE_STANDBY;
+  P1OUT ^= P1_LED_GRN;
+  printf("Hello world %d!\r\n", counter++);
+  __bic_SR_register_on_exit(LPM3_bits);
+  P1IFG &= ~P1_BUTTON;
 }
+
+int putchar(int c) {
+  while(!(IFG2 & UCA0TXIFG));
+  UCA0TXBUF = (unsigned char) c;
+
+  return((unsigned char)c);
+}
+

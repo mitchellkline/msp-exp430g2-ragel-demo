@@ -1,6 +1,6 @@
 # makfile configuration
 NAME            = main
-OBJECTS         = main.o board.o uart.o
+OBJECTS         = main.o board.o
 CPU             = msp430g2553
 
 CFLAGS          = -mmcu=${CPU} -O2 -Wall -g
@@ -50,4 +50,3 @@ FORCE:
 #project dependencies
 main.o: main.c
 board.o: board.c board.h
-uart.o: uart.c uart.h

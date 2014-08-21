@@ -13,5 +13,6 @@
 
 void led_init(void);
 void button_init(void);
+void uart_init(void);
 void board_init(void);
 #endif
