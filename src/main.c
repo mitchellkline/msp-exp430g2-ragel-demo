@@ -20,7 +20,7 @@ USCIUARTRegs uartUsciRegs;
 uint8_t uartTxBuf[UART_BUF];
 uint8_t uartRxBuf[UART_BUF];
 
-void main(void) {
+int main(void) {
   /* initialization code */
   // disable watchdog
   WDTCTL = WDTPW | WDTHOLD;
@@ -100,6 +100,7 @@ void main(void) {
       }
     }
   }
+  return 0;
 }
 
 /* *************************************************************
