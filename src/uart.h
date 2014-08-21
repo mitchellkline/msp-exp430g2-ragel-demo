@@ -171,5 +171,4 @@ int numUartBytesReceived(UARTConfig * prtInf);
 unsigned char * getUartRxBufferData(UARTConfig * prtInf);
 int readRxBytes(UARTConfig * prtInf, unsigned char * data, int numBytesToRead, int offset);
 
-float round(float);
 #endif /* UART_H_ */
