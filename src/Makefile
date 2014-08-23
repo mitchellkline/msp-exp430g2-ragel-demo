@@ -34,7 +34,7 @@ download-bsl: all
 	msp430-bsl -e ${NAME}.elf
 
 clean:
-	rm -f ${NAME}.elf ${NAME}.a43 ${NAME}.lst ${OBJECTS}
+	rm -f ${NAME}.elf ${NAME}.a43 ${NAME}.lst ${OBJECTS} main.c
 
 #backup archive
 dist:
@@ -48,5 +48,7 @@ flash: all
 FORCE:
 
 #project dependencies
+main.c: main.rl
+	ragel -G2 -o $@ $<
 main.o: main.c
 board.o: board.c board.h

@@ -26,6 +26,7 @@ void uart_init(void) {
   UCA0BR1 = 0;
   UCA0MCTL = UCBRF_3 | UCOS16;
   UCA0CTL1 &= ~UCSWRST;
+  IE2 |= UCA0RXIE;
 }
 
 void board_init(void) {
