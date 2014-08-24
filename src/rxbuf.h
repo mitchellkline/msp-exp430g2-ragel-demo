@@ -1,20 +1,37 @@
 #ifndef __RXBUF_H__
 #define __RXBUF_H__
 
-#define RXBUFSIZE 10
+/*
+ * Set the size of rxbuf. Actual size will be one more than this to include the
+ * null character.
+ */
+#define RXBUFSIZE 30
+
+extern char rxbuf[RXBUFSIZE + 1];
+
+enum erxbuf {
+	ERXBUF_SUCCESS,
+	ERXBUF_FULL,
+	ERXBUF_RANGE,
+	ERXBUF_UNDEF,
+	ERXBUF_CS
+};
 
 /*
  * Add character to buffer.  The buffer is always maintained as a proper C
- * string.  The actual buffer size is one more than RXBUFSIZE, ensuring there is
- * always room to add a null character.
+ * string.
  */
-int8_t add_to_rxbuf(char);
+enum erxbuf add_to_rxbuf(char);
 
+/*
+ * Remove the last character from rxbuf
+ */
 void remove_from_rxbuf(void);
 
-void parse_rxbuf(void);
-
+/*
+ * Re-initialize rxbuf.
+ */
 void clear_rxbuf(void);
 
-char *get_rxbuf(void);
+
 #endif

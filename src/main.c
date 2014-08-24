@@ -3,7 +3,8 @@
 #include "board.h"
 #include "rxbuf.h"
 
-int main(void) {
+int main(void) 
+{
 	/* 
 	 * disable watchdog
 	 */
@@ -21,43 +22,46 @@ int main(void) {
 	return 0;
 }
 
-__attribute__((__interrupt__(USCIAB0RX_VECTOR)))
-static void
-USCIAB0RX_ISR(void) {
-	/*
-	 * Get the character from the buffer. Always echo to the terminal.
-	 */
+/* 
+ * USCI UART RX interrupt handler
+ *
+ * Get the character from the buffer. Always echo to the terminal.
+ *	
+ * A carraige return indicates the end of a command.  Send a line feed
+ * to acknowledge receipt of the command. Optionally, we echo the rxbuf
+ * state.  Finally, we parse rxbuf.
+ * 
+ * If we receive the backspace key, we first update the terminal to
+ * delete the last character.  We then remove the character from rxbuf.
+ * 
+ * If we didn't receive a special character, we add it to rxbuf and
+ * check for errors.
+ */
+__attribute__((__interrupt__(USCIAB0RX_VECTOR))) static void USCIAB0RX_ISR(void) 
+{
 	char c = (char)UCA0RXBUF;
 	printf("%c",c);
-	/* 
-	 * A carraige return indicates the end of a command.  Send a line feed
-	 * to acknowledge receipt of the command. Optionally, we echo the rxbuf
-	 * state.  Finally, we parse rxbuf.
-	 */
+	
 	if (c == '\r') {
 		printf("\n");
-#ifdef DEBUG
-		printf("rxbuf = %s\r\n",get_rxbuf());
-#endif
-		parse_rxbuf();
+		#ifdef DEBUG
+		printf("rxbuf = %s\r\n",rxbuf);
+		#endif
+		enum eboard err = parse(rxbuf);
+		if (err) {
+			printf("ERROR %d: Invalid command.\r\n",err);
+		}
+		clear_rxbuf();
 	}
-	/* 
-	 * If we receive the backspace key, we first update the terminal to
-	 * delete the last character.  We then remove the character from rxbuf.
-	 */
 	else if (c == '\b') {
 		printf(" \b");
 		remove_from_rxbuf();
 	}
-	/* 
-	 * If we didn't receive a special character, we add it to rxbuf and
-	 * check for errors.
-	 */
 	else {
-		int8_t err = add_to_rxbuf(c);
+		enum erxbuf err = add_to_rxbuf(c);
 		if (err) {
 			printf("\r\nERROR %d: rxbuf full. Resetting...\r\n",
-				err);
+			err);
 			clear_rxbuf();
 		}
 	}
@@ -66,9 +70,7 @@ USCIAB0RX_ISR(void) {
 /* 
  * Port Interrupt for Button Press 
  */ 
-__attribute__((__interrupt__(PORT1_VECTOR)))
-static void
-PORT1_ISR(void)
+__attribute__((__interrupt__(PORT1_VECTOR))) static void PORT1_ISR(void)
 {   
 	P1OUT ^= P1_LED_GRN;
 	P1IFG &= ~P1_BUTTON;
@@ -76,5 +78,3 @@ PORT1_ISR(void)
 	 * __bic_SR_register_on_exit(LPM3_bits);
 	 */
 }
-
-

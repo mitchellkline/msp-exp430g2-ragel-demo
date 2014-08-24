@@ -3,7 +3,7 @@ NAME            = main
 OBJECTS         = main.o board.o rxbuf.o putchar.o
 CPU             = msp430g2553
 
-CFLAGS          = -mmcu=${CPU} -O3 -Wall -g -DDEBUG
+CFLAGS          = -mmcu=${CPU} -Wall -O3 -g -DDEBUG
 
 #switch the compiler (for the internal make rules)
 CC              = msp430-gcc
@@ -34,7 +34,7 @@ download-bsl: all
 	msp430-bsl -e ${NAME}.elf
 
 clean:
-	rm -f ${NAME}.elf ${NAME}.a43 ${NAME}.lst ${OBJECTS}
+	rm -f ${NAME}.elf ${NAME}.a43 ${NAME}.lst ${OBJECTS} board.c
 
 #backup archive
 dist:
@@ -48,8 +48,8 @@ flash: all
 FORCE:
 
 #project dependencies
-#main.c: main.rl
-#	ragel -G2 -o $@ $<
+board.c: board.rl
+	ragel -G2 -o $@ $<
 main.o: main.c
 board.o: board.c board.h
 rxbuf.o: rxbuf.h
