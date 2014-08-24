@@ -1,13 +1,13 @@
 #include <msp430.h>
 #include <stdio.h>
 #include "board.h"
-#include "rxbuf.h"
+#include "strbuf.h"
 
 /*
  * Allow for one extra character for terminator \0. Rely on compiler to
  * initialize all values in rxbuf to 0.
  */
-struct rxbuf_stack rxbuf;
+struct strbuf_stack rxbuf;
 
 int main(void) 
 {
@@ -16,7 +16,7 @@ int main(void)
 	 */
 	WDTCTL = WDTPW | WDTHOLD;
 
-	rxbuf_init(&rxbuf);
+	strbuf_init(&rxbuf);
 	board_init();
 	     
 	__enable_interrupt();
@@ -58,18 +58,18 @@ __attribute__((__interrupt__(USCIAB0RX_VECTOR))) static void USCIAB0RX_ISR(void)
 		if (err) {
 			printf("ERROR %d: Invalid command.\r\n",err);
 		}
-		rxbuf_init(&rxbuf);
+		strbuf_init(&rxbuf);
 	}
 	else if (c == '\b') {
 		printf(" \b");
-		rxbuf_pop(&rxbuf);
+		strbuf_pop(&rxbuf);
 	}
 	else {
-		enum erxbuf err = rxbuf_push(&rxbuf,c);
+		enum estrbuf err = strbuf_push(&rxbuf,c);
 		if (err) {
-			printf("\r\nERROR %d: rxbuf full. Resetting...\r\n",
+			printf("\r\nERROR %d: strbuf full. Resetting...\r\n",
 			err);
-			rxbuf_init(&rxbuf);
+			strbuf_init(&rxbuf);
 		}
 	}
 }

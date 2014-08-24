@@ -1,6 +1,6 @@
 # makfile configuration
 NAME            = main
-OBJECTS         = main.o board.o rxbuf.o putchar.o
+OBJECTS         = main.o board.o strbuf.o putchar.o
 CPU             = msp430g2553
 
 CFLAGS          = -mmcu=${CPU} -Wall -O3 -g #-DDEBUG
@@ -52,5 +52,5 @@ board.c: board.rl
 	ragel -G2 -o $@ $<
 main.o: main.c
 board.o: board.c board.h
-rxbuf.o: rxbuf.h
+strbuf.o: strbuf.h
 putchar.o: putchar.c

@@ -1,5 +1,5 @@
 //#include <inttypes.h>
-#include "rxbuf.h"
+#include "strbuf.h"
 
 
 /*
@@ -7,20 +7,20 @@
  * string.  The actual buffer size is one more than RXBUFSIZE, ensuring there is
  * always room to add a null character.
  */
-enum erxbuf rxbuf_push(struct rxbuf_stack *buf, char c) 
+enum estrbuf strbuf_push(struct strbuf_stack *buf, char c) 
 {
-	if (buf->i > (RXBUFSIZE - 1)) {
-		return ERXBUF_FULL;
+	if (buf->i > (STRBUFSIZE - 1)) {
+		return ESTRBUF_FULL;
 	}
 	else {
 		buf->s[buf->i] = c;
 		buf->s[buf->i+1] = '\0';
 		buf->i = buf->i + 1;
-		return ERXBUF_SUCCESS;
+		return ESTRBUF_SUCCESS;
 	}
 }
 
-void rxbuf_pop(struct rxbuf_stack *buf) 
+void strbuf_pop(struct strbuf_stack *buf) 
 {
 	if (buf->i > 0) {
 		buf->i = buf->i - 1;
@@ -28,7 +28,7 @@ void rxbuf_pop(struct rxbuf_stack *buf)
 	}
 }
 
-void rxbuf_init(struct rxbuf_stack *buf) 
+void strbuf_init(struct strbuf_stack *buf) 
 {
 	buf->i = 0;
 	buf->s[0] = '\0';
