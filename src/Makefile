@@ -3,7 +3,7 @@ NAME            = main
 OBJECTS         = main.o board.o rxbuf.o putchar.o
 CPU             = msp430g2553
 
-CFLAGS          = -mmcu=${CPU} -Wall -O3 -g -DDEBUG
+CFLAGS          = -mmcu=${CPU} -Wall -O3 -g #-DDEBUG
 
 #switch the compiler (for the internal make rules)
 CC              = msp430-gcc

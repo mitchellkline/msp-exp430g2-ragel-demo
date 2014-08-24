@@ -1,13 +1,16 @@
 #ifndef __RXBUF_H__
 #define __RXBUF_H__
-
+#include <inttypes.h>
 /*
  * Set the size of rxbuf. Actual size will be one more than this to include the
  * null character.
  */
-#define RXBUFSIZE 30
+#define RXBUFSIZE 32
 
-extern char rxbuf[RXBUFSIZE + 1];
+struct rxbuf_stack {
+	char s[RXBUFSIZE+1];
+	uint8_t i;
+};
 
 enum erxbuf {
 	ERXBUF_SUCCESS,
@@ -21,17 +24,17 @@ enum erxbuf {
  * Add character to buffer.  The buffer is always maintained as a proper C
  * string.
  */
-enum erxbuf add_to_rxbuf(char);
+enum erxbuf rxbuf_push(struct rxbuf_stack *, char);
 
 /*
  * Remove the last character from rxbuf
  */
-void remove_from_rxbuf(void);
+void rxbuf_pop(struct rxbuf_stack *);
 
 /*
  * Re-initialize rxbuf.
  */
-void clear_rxbuf(void);
+void rxbuf_init(struct rxbuf_stack *);
 
 
 #endif

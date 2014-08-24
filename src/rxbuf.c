@@ -1,12 +1,5 @@
 //#include <inttypes.h>
 #include "rxbuf.h"
-/*
- * Allow for one extra character for terminator \0. Rely on compiler to
- * initialize all values in rxbuf to 0.
- */
-char rxbuf[RXBUFSIZE + 1];
-static unsigned int rxbuf_i = 0;
-
 
 
 /*
@@ -14,29 +7,29 @@ static unsigned int rxbuf_i = 0;
  * string.  The actual buffer size is one more than RXBUFSIZE, ensuring there is
  * always room to add a null character.
  */
-enum erxbuf add_to_rxbuf(char c) 
+enum erxbuf rxbuf_push(struct rxbuf_stack *buf, char c) 
 {
-	if (rxbuf_i > (RXBUFSIZE - 1)) {
+	if (buf->i > (RXBUFSIZE - 1)) {
 		return ERXBUF_FULL;
 	}
 	else {
-		rxbuf[rxbuf_i] = c;
-		rxbuf[rxbuf_i+1] = '\0';
-		rxbuf_i++;
+		buf->s[buf->i] = c;
+		buf->s[buf->i+1] = '\0';
+		buf->i = buf->i + 1;
 		return ERXBUF_SUCCESS;
 	}
 }
 
-void remove_from_rxbuf() 
+void rxbuf_pop(struct rxbuf_stack *buf) 
 {
-	if (rxbuf_i > 0) {
-		rxbuf_i--;
-		rxbuf[rxbuf_i] = '\0';
+	if (buf->i > 0) {
+		buf->i = buf->i - 1;
+		buf->s[buf->i] = '\0';
 	}
 }
 
-void clear_rxbuf() 
+void rxbuf_init(struct rxbuf_stack *buf) 
 {
-	rxbuf_i = 0;
-	rxbuf[0] = '\0';
+	buf->i = 0;
+	buf->s[0] = '\0';
 }

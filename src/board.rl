@@ -1,9 +1,7 @@
 #include "board.h"
 #include <inttypes.h>
 #include <string.h>
-#ifdef DEBUG
-	#include <stdio.h>
-#endif
+#include <stdio.h>
 
 %%{
 	machine board;
@@ -32,8 +30,8 @@ enum eboard parse(char *p)
 	char *pe = p + strlen(p);
 	int cs;
 
-	uint8_t regaddr = 0;
-	uint8_t regval = 0;
+	uint16_t regaddr = 0;
+	uint16_t regval = 0;
 
 	enum {
 		UNDEF,
@@ -75,11 +73,11 @@ enum eboard parse(char *p)
 	if ( cs < board_first_final ) {
 		return EBOARD_CS;
 	}
-	else if (command == READ) {
+	if (command == READ)  {
 		#ifdef DEBUG
 		printf("Register address: %u\r\n", regaddr);
 		#endif
-		printf("Register value: %u\r\n",*((uint8_t *)regaddr));
+		printf("%x\r\n",*((uintptr_t *)regaddr));
 
 		return EBOARD_SUCCESS;
 	}
@@ -88,6 +86,7 @@ enum eboard parse(char *p)
 		printf("Register address: %u\r\n", regaddr);
 		printf("Register value: %u\r\n", regval);
 		#endif
+		*((uintptr_t *)regaddr) = regval;
 		return EBOARD_SUCCESS;
 	}
 	else {

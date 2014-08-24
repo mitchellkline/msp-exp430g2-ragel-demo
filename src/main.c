@@ -3,6 +3,12 @@
 #include "board.h"
 #include "rxbuf.h"
 
+/*
+ * Allow for one extra character for terminator \0. Rely on compiler to
+ * initialize all values in rxbuf to 0.
+ */
+struct rxbuf_stack rxbuf;
+
 int main(void) 
 {
 	/* 
@@ -10,6 +16,7 @@ int main(void)
 	 */
 	WDTCTL = WDTPW | WDTHOLD;
 
+	rxbuf_init(&rxbuf);
 	board_init();
 	     
 	__enable_interrupt();
@@ -45,24 +52,24 @@ __attribute__((__interrupt__(USCIAB0RX_VECTOR))) static void USCIAB0RX_ISR(void)
 	if (c == '\r') {
 		printf("\n");
 		#ifdef DEBUG
-		printf("rxbuf = %s\r\n",rxbuf);
+		printf("rxbuf = %s\r\n",rxbuf.s);
 		#endif
-		enum eboard err = parse(rxbuf);
+		enum eboard err = parse(rxbuf.s);
 		if (err) {
 			printf("ERROR %d: Invalid command.\r\n",err);
 		}
-		clear_rxbuf();
+		rxbuf_init(&rxbuf);
 	}
 	else if (c == '\b') {
 		printf(" \b");
-		remove_from_rxbuf();
+		rxbuf_pop(&rxbuf);
 	}
 	else {
-		enum erxbuf err = add_to_rxbuf(c);
+		enum erxbuf err = rxbuf_push(&rxbuf,c);
 		if (err) {
 			printf("\r\nERROR %d: rxbuf full. Resetting...\r\n",
 			err);
-			clear_rxbuf();
+			rxbuf_init(&rxbuf);
 		}
 	}
 }
