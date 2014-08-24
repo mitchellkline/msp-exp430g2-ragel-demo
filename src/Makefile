@@ -1,9 +1,9 @@
 # makfile configuration
 NAME            = main
-OBJECTS         = main.o board.o
+OBJECTS         = main.o board.o rxbuf.o putchar.o
 CPU             = msp430g2553
 
-CFLAGS          = -mmcu=${CPU} -O2 -Wall -g
+CFLAGS          = -mmcu=${CPU} -O3 -Wall -g -DDEBUG
 
 #switch the compiler (for the internal make rules)
 CC              = msp430-gcc
@@ -19,7 +19,7 @@ download: download-jtag
 
 #additional rules for files
 ${NAME}.elf: ${OBJECTS}
-	${CC} -mmcu=${CPU} -o $@ ${OBJECTS} -lm
+	${CC} -mmcu=${CPU} -o $@ ${OBJECTS}
 
 ${NAME}.a43: ${NAME}.elf
 	msp430-objcopy -O ihex $^ $@
@@ -34,7 +34,7 @@ download-bsl: all
 	msp430-bsl -e ${NAME}.elf
 
 clean:
-	rm -f ${NAME}.elf ${NAME}.a43 ${NAME}.lst ${OBJECTS} main.c
+	rm -f ${NAME}.elf ${NAME}.a43 ${NAME}.lst ${OBJECTS}
 
 #backup archive
 dist:
@@ -48,7 +48,9 @@ flash: all
 FORCE:
 
 #project dependencies
-main.c: main.rl
-	ragel -G2 -o $@ $<
+#main.c: main.rl
+#	ragel -G2 -o $@ $<
 main.o: main.c
 board.o: board.c board.h
+rxbuf.o: rxbuf.h
+putchar.o: putchar.c
