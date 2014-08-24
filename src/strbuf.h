@@ -1,15 +1,18 @@
 #ifndef __STRBUF_H__
 #define __STRBUF_H__
-#include <inttypes.h>
 /*
  * Set the size of rxbuf. Actual size will be one more than this to include the
  * null character.
  */
 #define STRBUFSIZE 32
 
+/*
+ * The stack contains a c-string (always null terminated) and the index of the
+ * null terminator
+ */
 struct strbuf_stack {
 	char s[STRBUFSIZE+1];
-	uint8_t i;
+	unsigned int i;
 };
 
 enum estrbuf {
@@ -17,7 +20,8 @@ enum estrbuf {
 	ESTRBUF_FULL,
 	ESTRBUF_RANGE,
 	ESTRBUF_UNDEF,
-	ESTRBUF_CS
+	ESTRBUF_CS,
+	ESTRBUF_EMPTY
 };
 
 /*
@@ -29,7 +33,7 @@ enum estrbuf strbuf_push(struct strbuf_stack *, char);
 /*
  * Remove the last character from rxbuf
  */
-void strbuf_pop(struct strbuf_stack *);
+enum estrbuf strbuf_pop(struct strbuf_stack *, char *);
 
 /*
  * Re-initialize rxbuf.

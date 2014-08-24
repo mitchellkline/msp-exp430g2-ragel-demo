@@ -1,6 +1,6 @@
 # makfile configuration
 NAME            = main
-OBJECTS         = main.o board.o strbuf.o putchar.o
+OBJECTS         = main.o board.o strbuf.o putchar.o parser.o
 CPU             = msp430g2553
 
 CFLAGS          = -mmcu=${CPU} -Wall -O3 -g #-DDEBUG
@@ -34,7 +34,7 @@ download-bsl: all
 	msp430-bsl -e ${NAME}.elf
 
 clean:
-	rm -f ${NAME}.elf ${NAME}.a43 ${NAME}.lst ${OBJECTS} board.c
+	rm -f ${NAME}.elf ${NAME}.a43 ${NAME}.lst ${OBJECTS} parser.c
 
 #backup archive
 dist:
@@ -48,9 +48,10 @@ flash: all
 FORCE:
 
 #project dependencies
-board.c: board.rl
+parser.c: parser.rl
 	ragel -G2 -o $@ $<
 main.o: main.c
 board.o: board.c board.h
-strbuf.o: strbuf.h
+strbuf.o: strbuf.c strbuf.h
 putchar.o: putchar.c
+parser.o: parser.c parser.h

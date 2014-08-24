@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include "board.h"
 #include "strbuf.h"
+#include "parser.h"
 
 /*
  * Allow for one extra character for terminator \0. Rely on compiler to
@@ -54,7 +55,7 @@ __attribute__((__interrupt__(USCIAB0RX_VECTOR))) static void USCIAB0RX_ISR(void)
 		#ifdef DEBUG
 		printf("rxbuf = %s\r\n",rxbuf.s);
 		#endif
-		enum eboard err = parse(rxbuf.s);
+		enum eparser err = parse(rxbuf.s);
 		if (err) {
 			printf("ERROR %d: Invalid command.\r\n",err);
 		}
@@ -62,7 +63,7 @@ __attribute__((__interrupt__(USCIAB0RX_VECTOR))) static void USCIAB0RX_ISR(void)
 	}
 	else if (c == '\b') {
 		printf(" \b");
-		strbuf_pop(&rxbuf);
+		strbuf_pop(&rxbuf, &c);
 	}
 	else {
 		enum estrbuf err = strbuf_push(&rxbuf,c);

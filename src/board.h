@@ -11,20 +11,8 @@
 #define     P1_RXD                BIT1                      // RXD on P1.1
 #define     P1_TXD                BIT2                      // TXD on P1.2
 
-enum eboard {
-	EBOARD_SUCCESS,
-	EBOARD_CS,
-	EBOARD_UNDEF,
-	EBOARD_RANGE
-};
-
 void led_init(void);
 void button_init(void);
 void uart_init(void);
 void board_init(void);
-/*
- * Parse the receive buffer and re-initialize.
- */
-enum eboard parse(char *);
-
 #endif

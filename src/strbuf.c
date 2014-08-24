@@ -20,11 +20,16 @@ enum estrbuf strbuf_push(struct strbuf_stack *buf, char c)
 	}
 }
 
-void strbuf_pop(struct strbuf_stack *buf) 
+enum estrbuf strbuf_pop(struct strbuf_stack *buf, char *c) 
 {
 	if (buf->i > 0) {
 		buf->i = buf->i - 1;
+		*c = buf->s[buf->i];
 		buf->s[buf->i] = '\0';
+		return ESTRBUF_SUCCESS;
+	}
+	else {
+		return ESTRBUF_EMPTY;
 	}
 }
 
