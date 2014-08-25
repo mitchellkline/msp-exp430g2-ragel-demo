@@ -19,7 +19,15 @@ int main(void)
 
 	strbuf_init(&rxbuf);
 	board_init();
-	     
+
+	/*
+	 * UART does not connect if we print anything before establishing a
+	 * connection.
+	 * printf(	"MSP-EXP430G2 Launchpad UART established.\r\n"
+	 *	"Enter command '?' for list of commands.\r\n"
+	 *	"> ");
+	 */
+     
 	__enable_interrupt();
 
 	while(1) {
@@ -80,7 +88,8 @@ __attribute__((__interrupt__(USCIAB0RX_VECTOR))) static void USCIAB0RX_ISR(void)
  */ 
 __attribute__((__interrupt__(PORT1_VECTOR))) static void PORT1_ISR(void)
 {   
-	P1OUT ^= P1_LED_GRN;
+	//P1OUT ^= P1_LED_GRN;
+	printf("User button interrupt.\r\n");
 	P1IFG &= ~P1_BUTTON;
 	/*
 	 * __bic_SR_register_on_exit(LPM3_bits);
