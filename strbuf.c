@@ -38,3 +38,9 @@ void strbuf_init(struct strbuf_stack *buf)
 	buf->i = 0;
 	buf->s[0] = '\0';
 }
+
+int strbuf_is_empty(struct strbuf_stack *buf)
+{
+	if (buf->i == 0) return 1;
+	else return 0;
+}

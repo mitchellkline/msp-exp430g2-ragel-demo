@@ -40,5 +40,6 @@ enum estrbuf strbuf_pop(struct strbuf_stack *, char *);
  */
 void strbuf_init(struct strbuf_stack *);
 
+int strbuf_is_empty(struct strbuf_stack *);
 
 #endif

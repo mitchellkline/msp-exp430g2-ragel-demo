@@ -1,7 +1,11 @@
 #include "board.h"
 #include <string.h>
 #include <stdio.h>
+#include <inttypes.h>
 #include "parser.h"
+#include "temp.h"
+
+#define TSAMPLES_E 5
 
 static const char *help_msg =
 "             get <addr>: Get value of register at <addr>. <addr> is hex,\r\n"
@@ -12,6 +16,7 @@ static const char *help_msg =
 "setbit <addr> <bp> <bv>: Set value of bit position <bp> at address <addr>\r\n"
 "                         to bit value <bv>.\r\n"
 "           led<n> [0|1]: Set led <n> [off|on].\r\n"
+"                   temp: Print temperature in degrees Celsius.\r\n"
 "                 help|?: Display this help message.\r\n"
 ;
 
@@ -54,7 +59,8 @@ enum eparser parse(char *p)
 		SET,
 		GETBIT,
 		SETBIT,
-		HELP
+		HELP,
+		TEMP
 	} command = UNDEF;
 
 	%%{
@@ -115,13 +121,15 @@ enum eparser parse(char *p)
 		led_cmd_f =
 			'led'@{command = SETBIT;} lednum_f space bv_f;
 		help_cmd_f = ('?'|'help')@{command = HELP;};
+		temp_cmd_f = 'temp'@{command = TEMP;};
 		
 		main := ( get_cmd_f 
 			| set_cmd_f 
 			| getbit_cmd_f
 			| setbit_cmd_f
 			| led_cmd_f
-			| help_cmd_f);
+			| help_cmd_f
+			| temp_cmd_f);
 
 		write init;
 		write exec;
@@ -157,6 +165,20 @@ enum eparser parse(char *p)
 			*regaddr_p |= bm;
 		else
 			*regaddr_p &= ~bm;
+		return EPARSER_SUCCESS;
+	}
+	else if (command == TEMP) {
+		int32_t temp = 0;
+		uint16_t i;
+		for (i = 0; i < (1<<TSAMPLES_E); i++) {
+			int16_t tmp;
+			temp_sample(&tmp);
+			temp += tmp;
+		}
+		temp = (temp >> TSAMPLES_E);
+		int16_t temp_i = (int16_t)(temp/100.0);
+		int16_t temp_d = temp - (temp_i*100);
+		printf("%d.%d\r\n", temp_i, temp_d);
 		return EPARSER_SUCCESS;
 	}
 	else if (command == HELP) {

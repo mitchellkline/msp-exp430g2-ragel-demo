@@ -3,12 +3,15 @@
 #include "board.h"
 #include "strbuf.h"
 #include "parser.h"
+#include "temp.h"
+
 
 /*
  * Allow for one extra character for terminator \0. Rely on compiler to
  * initialize all values in rxbuf to 0.
  */
 struct strbuf_stack rxbuf;
+volatile uint8_t state;
 
 int main(void) 
 {
@@ -18,6 +21,7 @@ int main(void)
 	WDTCTL = WDTPW | WDTHOLD;
 
 	strbuf_init(&rxbuf);
+	temp_init();
 	board_init();
 
 	/*
@@ -68,10 +72,14 @@ __attribute__((__interrupt__(USCIAB0RX_VECTOR))) static void USCIAB0RX_ISR(void)
 			printf("ERROR %d: Invalid command.\r\n",err);
 		}
 		strbuf_init(&rxbuf);
+		printf("> ");
 	}
 	else if (c == '\b') {
-		printf(" \b");
-		strbuf_pop(&rxbuf, &c);
+		if (!strbuf_is_empty(&rxbuf)) {
+			printf(" \b");
+			strbuf_pop(&rxbuf, &c);
+		}
+		else printf(" ");
 	}
 	else {
 		enum estrbuf err = strbuf_push(&rxbuf,c);
@@ -79,6 +87,7 @@ __attribute__((__interrupt__(USCIAB0RX_VECTOR))) static void USCIAB0RX_ISR(void)
 			printf("\r\nERROR %d: strbuf full. Resetting...\r\n",
 			err);
 			strbuf_init(&rxbuf);
+			printf("> ");
 		}
 	}
 }
